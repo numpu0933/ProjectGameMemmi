@@ -10,27 +10,23 @@ public class PlayerStats : MonoBehaviour
     public int coins = 0;
 
     [Header("Respawn Settings")]
-    public Transform respawnPoint; // จุดเริ่มต้น respawn
-    public Image blackScreen;      // UI Panel สีดำครอบหน้าจอ
-    public float fadeDuration = 1f; // เวลา fade in/out
-    public float respawnDelay = 1f; // เวลาหลังหน้าจอดำก่อน respawn
+    public Transform respawnPoint;
+    public Image blackScreen;
+    public float fadeDuration = 1f;
+    public float respawnDelay = 1f;
 
     private bool isDead = false;
-    private MonoBehaviour playerControl; // Script ควบคุม Player เช่น PlayerMove
+    private MonoBehaviour playerControl;
 
     void Start()
     {
         currentHealth = maxHealth;
-
-        // หา Script ควบคุม Player (สมมติว่า PlayerMove)
         playerControl = GetComponent<MonoBehaviour>();
 
-        // เริ่มหน้าจอโปร่งใส
         if (blackScreen != null)
             blackScreen.color = new Color(0, 0, 0, 0);
     }
 
-    /// เรียกเพื่อให้ Player โดนความเสียหาย
     public void TakeDamage(int damage)
     {
         if (isDead) return;
@@ -43,7 +39,6 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    /// ฟื้น HP
     public void Heal(int amount)
     {
         currentHealth += amount;
@@ -51,16 +46,13 @@ public class PlayerStats : MonoBehaviour
             currentHealth = maxHealth;
     }
 
-    /// ระบบตาย + Respawn
     IEnumerator HandleDeath()
     {
         isDead = true;
 
-        // ปิดการควบคุม Player
         if (playerControl != null)
             playerControl.enabled = false;
 
-        // Fade หน้าจอเป็นดำ
         if (blackScreen != null)
         {
             float timer = 0f;
@@ -73,21 +65,16 @@ public class PlayerStats : MonoBehaviour
             blackScreen.color = new Color(0, 0, 0, 1);
         }
 
-        // รอเวลาสั้น ๆ ก่อน Respawn
         yield return new WaitForSeconds(respawnDelay);
 
-        // ย้าย Player ไปจุด Respawn
         if (respawnPoint != null)
             transform.position = respawnPoint.position;
 
-        // ฟื้นฟู HP เต็ม
         currentHealth = maxHealth;
 
-        // เปิดการควบคุม Player
         if (playerControl != null)
             playerControl.enabled = true;
 
-        // Fade กลับหน้าจอโปร่งใส
         if (blackScreen != null)
         {
             float timer = 0f;
@@ -101,5 +88,19 @@ public class PlayerStats : MonoBehaviour
         }
 
         isDead = false;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("BossBullet"))
+        {
+            BossBullet bullet = other.GetComponent<BossBullet>();
+            if (bullet != null)
+            {
+                TakeDamage(bullet.damage);
+            }
+
+            Destroy(other.gameObject);
+        }
     }
 }

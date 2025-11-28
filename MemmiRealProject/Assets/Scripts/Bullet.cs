@@ -12,6 +12,7 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        
         if (other.CompareTag("Enemy"))
         {
             Enemy enemy = other.GetComponent<Enemy>();
@@ -19,6 +20,23 @@ public class Bullet : MonoBehaviour
             {
                 enemy.TakeDamage(damage);
             }
+            Destroy(gameObject);
+        }
+
+        
+        if (other.CompareTag("Boss"))
+        {
+            BossController boss = other.GetComponent<BossController>();
+            if (boss != null)
+            {
+                boss.TakeDamage(damage);
+            }
+            Destroy(gameObject);
+        }
+
+        
+        if (other.CompareTag("Ground"))
+        {
             Destroy(gameObject);
         }
     }
