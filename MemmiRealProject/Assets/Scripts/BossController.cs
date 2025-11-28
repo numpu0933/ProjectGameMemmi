@@ -2,41 +2,30 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class BossController : MonoBehaviour
+public class BossController : EnemyBase
 {
-    [Header("Health")]
-    public int maxHealth = 300;
-    public int currentHealth;
     public Slider hpSlider;
-
-    [Header("Movement")]
     public float floatSpeed = 2f;
     public float floatRange = 2f;
     private Vector3 startPos;
 
-    [Header("Shooting")]
     public GameObject bossBulletPrefab;
     public Transform firePoint;
     public float shootInterval = 2f;
     private float shootTimer;
-
     public Transform player;
 
-    [Header("Visual Feedback")]
-    public SpriteRenderer spriteRenderer;
-    public float flashDuration = 0.1f;
-    private Coroutine flashCoroutine;
-
-    [Header("Camera")]
     public Transform bossCameraPos;
     public float cameraTransitionSpeed = 2f;
     public float bossCameraSize = 7f;
     public float normalCameraSize = 5f;
     private bool playerInBossZone = false;
 
-    void Start()
+    public GameObject winPanel;
+
+    protected override void Start()
     {
-        currentHealth = maxHealth;
+        base.Start();
         startPos = transform.position;
 
         if (hpSlider != null)
@@ -102,7 +91,6 @@ public class BossController : MonoBehaviour
     void HandleShooting()
     {
         shootTimer += Time.deltaTime;
-
         if (shootTimer >= shootInterval)
         {
             ShootAtPlayer();
@@ -115,10 +103,12 @@ public class BossController : MonoBehaviour
         if (player == null) return;
 
         Vector2 direction = (player.position - firePoint.position).normalized;
-
         ShootBullet(direction);
         ShootBullet(Quaternion.Euler(0, 0, 15) * direction);
         ShootBullet(Quaternion.Euler(0, 0, -15) * direction);
+
+        if (AudioManager.Instance != null && AudioManager.Instance.shootSound != null)
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.shootSound);
     }
 
     void ShootBullet(Vector2 dir)
@@ -128,52 +118,51 @@ public class BossController : MonoBehaviour
         rb.linearVelocity = dir * 6f;
     }
 
-    public void TakeDamage(int damage)
+    public override void TakeDamage(int damage)
     {
-        currentHealth -= damage;
+        base.TakeDamage(damage);
 
-        if (spriteRenderer != null)
-        {
-            if (flashCoroutine != null)
-                StopCoroutine(flashCoroutine);
-
-            flashCoroutine = StartCoroutine(FlashRed());
-        }
+        if (AudioManager.Instance != null && AudioManager.Instance.bossHitSound != null)
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.bossHitSound);
 
         if (currentHealth <= 0)
-        {
-            Die();
-        }
+            StartCoroutine(SlowMotionAndStop());
     }
 
-    private IEnumerator FlashRed()
+    protected override void Die()
     {
-        Color originalColor = spriteRenderer.color;
-        spriteRenderer.color = Color.red;
-        yield return new WaitForSeconds(flashDuration);
-        spriteRenderer.color = originalColor;
-        flashCoroutine = null;
+        if (AudioManager.Instance != null && AudioManager.Instance.bossDeathSound != null)
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.bossDeathSound);
+
+        if (winPanel != null)
+            winPanel.SetActive(true);
+
+        if (AudioManager.Instance != null && AudioManager.Instance.winMusic != null)
+            AudioManager.Instance.PlayMusic(AudioManager.Instance.winMusic);
+
+        base.Die();
     }
 
-    void Die()
+    private IEnumerator SlowMotionAndStop()
     {
-        Debug.Log("BOSS DEFEATED!");
-        Destroy(gameObject);
+        Time.timeScale = 0.2f;
+        Time.fixedDeltaTime = 0.02f * Time.timeScale;
+
+        yield return new WaitForSecondsRealtime(1f);
+
+        Time.timeScale = 0f;
+        Time.fixedDeltaTime = 0.02f;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-        {
+        if (other.CompareTag("BossZone"))
             playerInBossZone = true;
-        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-        {
+        if (other.CompareTag("BossZone"))
             playerInBossZone = false;
-        }
     }
 }

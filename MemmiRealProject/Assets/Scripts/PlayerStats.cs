@@ -57,6 +57,11 @@ public class PlayerStats : MonoBehaviour
             flashCoroutine = StartCoroutine(FlashRed());
         }
 
+        if (AudioManager.Instance != null && AudioManager.Instance.hitSound != null)
+        {
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.hitSound);
+        }
+
         if (currentHealth <= 0)
         {
             StartCoroutine(HandleDeath());

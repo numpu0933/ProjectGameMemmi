@@ -1,59 +1,72 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Enemy : MonoBehaviour
+public class Enemy : EnemyBase
 {
     public float moveSpeed = 2f;
     public float moveRange = 3f;
     private Vector3 startPosition;
     private int direction = 1;
 
-    public int maxHealth = 500;
-    private int currentHealth;
+    public int contactDamage = 10;
+    public float attackCooldown = 1f;
+    private bool canAttack = true;
 
-    private SpriteRenderer spriteRenderer;
-    public float flashDuration = 0.1f;
-
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         startPosition = transform.position;
-        currentHealth = maxHealth;
-        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
+        MovePatrol();
+    }
+
+    private void MovePatrol()
+    {
         float targetX = startPosition.x + moveRange * direction;
         Vector3 targetPosition = new Vector3(targetX, transform.position.y, transform.position.z);
-
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
 
         if (Mathf.Abs(transform.position.x - targetX) < 0.05f)
             direction *= -1;
     }
 
-    public void TakeDamage(int damage)
+    private void OnCollisionStay2D(Collision2D collision)
     {
-        currentHealth -= damage;
-        StartCoroutine(FlashRed());
-        if (currentHealth <= 0)
+        if (!canAttack) return;
+
+        if (collision.gameObject.CompareTag("Player"))
         {
-            Die();
+            PlayerStats player = collision.gameObject.GetComponent<PlayerStats>();
+            if (player != null)
+            {
+                player.TakeDamage(contactDamage);
+                StartCoroutine(AttackDelay());
+            }
         }
     }
 
-    private IEnumerator FlashRed()
+    private IEnumerator AttackDelay()
     {
-        if (spriteRenderer != null)
-        {
-            spriteRenderer.color = Color.red;
-            yield return new WaitForSeconds(flashDuration);
-            spriteRenderer.color = Color.white;
-        }
+        canAttack = false;
+        yield return new WaitForSeconds(attackCooldown);
+        canAttack = true;
     }
 
-    private void Die()
+    
+    public override void TakeDamage(int damage)
     {
-        Destroy(gameObject);
+        base.TakeDamage(damage);
+
+        
+        AudioManager.Instance.PlaySFX(AudioManager.Instance.enemyHitSound);
+    }
+
+    protected override void Die()
+    {
+        base.Die();
+        
     }
 }

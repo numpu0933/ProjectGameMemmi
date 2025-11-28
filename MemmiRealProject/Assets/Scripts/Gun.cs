@@ -28,5 +28,10 @@ public class Gun : MonoBehaviour
         {
             rb.linearVelocity = firePoint.right * bulletSpeed;
         }
+
+        if (AudioManager.Instance != null && AudioManager.Instance.shootSound != null)
+        {
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.shootSound);
+        }
     }
 }
