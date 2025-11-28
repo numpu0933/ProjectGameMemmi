@@ -16,7 +16,7 @@ public class SimpleSpriteChange : MonoBehaviour
 
     void Update()
     {
-        // ถ้า Player กำลังเคลื่อนที่
+        
         if (Mathf.Abs(rb.linearVelocity.x) > 0.1f)
         {
             sr.sprite = walkSprite;

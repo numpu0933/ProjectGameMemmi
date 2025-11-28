@@ -2,11 +2,12 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class PlayerStats : MonoBehaviour
+public class PlayerStats : MonoBehaviour, IDamageable
 {
     public int maxHealth = 100;
     public int currentHealth;
     public int coins = 0;
+
     public Slider hpSlider;
     public SpriteRenderer spriteRenderer;
     public Transform respawnPoint;
@@ -76,6 +77,19 @@ public class PlayerStats : MonoBehaviour
 
         if (hpSlider != null)
             hpSlider.value = currentHealth;
+    }
+
+    public void AddCoins(int amount)
+    {
+        coins += amount;
+
+        // อัพเดท UI
+        if (UIManager.instance != null && UIManager.instance.coinText != null)
+            UIManager.instance.coinText.text = "Coins: " + coins;
+
+        // เล่นเสียงเก็บเหรียญ
+        if (AudioManager.Instance != null && AudioManager.Instance.coinSound != null)
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.coinSound);
     }
 
     private IEnumerator FlashRed()

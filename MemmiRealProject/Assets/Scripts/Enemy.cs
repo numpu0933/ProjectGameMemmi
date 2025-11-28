@@ -39,7 +39,7 @@ public class Enemy : EnemyBase
 
         if (collision.gameObject.CompareTag("Player"))
         {
-            PlayerStats player = collision.gameObject.GetComponent<PlayerStats>();
+            IDamageable player = collision.gameObject.GetComponent<IDamageable>();
             if (player != null)
             {
                 player.TakeDamage(contactDamage);
@@ -55,18 +55,10 @@ public class Enemy : EnemyBase
         canAttack = true;
     }
 
-    
     public override void TakeDamage(int damage)
     {
         base.TakeDamage(damage);
-
-        
-        AudioManager.Instance.PlaySFX(AudioManager.Instance.enemyHitSound);
-    }
-
-    protected override void Die()
-    {
-        base.Die();
-        
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.enemyHitSound);
     }
 }

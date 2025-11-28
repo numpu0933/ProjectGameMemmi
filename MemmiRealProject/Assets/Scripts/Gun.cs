@@ -2,10 +2,10 @@
 
 public class Gun : MonoBehaviour
 {
-    public Transform firePoint;
-    public GameObject bulletPrefab;
-    public float bulletSpeed = 100f;
-    public float fireRate = 0.2f;
+    [SerializeField] private Transform firePoint;
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private float bulletSpeed = 100f;
+    [SerializeField] private float fireRate = 0.2f;
 
     private float nextFireTime = 0f;
 
@@ -18,20 +18,15 @@ public class Gun : MonoBehaviour
         }
     }
 
-    void Shoot()
+    private void Shoot()
     {
         if (bulletPrefab == null) return;
 
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.linearVelocity = firePoint.right * bulletSpeed;
-        }
+        if (rb != null) rb.linearVelocity = firePoint.right * bulletSpeed;
 
         if (AudioManager.Instance != null && AudioManager.Instance.shootSound != null)
-        {
             AudioManager.Instance.PlaySFX(AudioManager.Instance.shootSound);
-        }
     }
 }

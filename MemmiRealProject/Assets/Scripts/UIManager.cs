@@ -4,12 +4,20 @@ using TMPro;
 
 public class UIManager : MonoBehaviour
 {
+    public static UIManager instance; 
+
     [Header("Player Stats UI")]
     public Slider healthBar;
-    public TextMeshProUGUI coinText; // ถ้าใช้ Text ให้เปลี่ยนเป็น Text
+    public TextMeshProUGUI coinText; 
     public TextMeshProUGUI gameOverText;
 
     public PlayerStats playerStats;
+
+    void Awake()
+    {
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
+    }
 
     void Start()
     {
@@ -20,22 +28,22 @@ public class UIManager : MonoBehaviour
         }
 
         if (gameOverText != null)
-            gameOverText.alpha = 0; // เริ่มซ่อน
+            gameOverText.alpha = 0; 
     }
 
     void Update()
     {
         if (playerStats == null) return;
 
-        // อัพเดท Health Bar
+        
         if (healthBar != null)
             healthBar.value = playerStats.currentHealth;
 
-        // อัพเดท Coin
+        
         if (coinText != null)
             coinText.text = "Coins: " + playerStats.coins;
 
-        // Game Over
+        
         if (playerStats.currentHealth <= 0 && gameOverText != null)
         {
             gameOverText.alpha = 1;

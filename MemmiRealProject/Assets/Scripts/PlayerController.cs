@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
 
-    // Ground Check
+    
     public Transform groundCheck;
     public float groundRadius = 0.2f;
     public LayerMask groundLayer;
@@ -22,19 +22,19 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // รับค่าการเดินจากคีย์บอร์ด
+        
         moveInput = Input.GetAxis("Horizontal");
 
-        // ตรวจสอบว่าเหยียบพื้นหรือไม่
+        
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, groundLayer);
 
-        // กระโดด
+        
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
 
-        // หันหน้าตัวละครอัตโนมัติ
+        
         if (moveInput > 0)
             transform.localScale = new Vector3(1, 1, 1);
         else if (moveInput < 0)
@@ -46,7 +46,7 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
     }
 
-    // แสดงวง GroundCheck เพื่อช่วยดีบัค
+    
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

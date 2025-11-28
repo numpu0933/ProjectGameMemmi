@@ -12,19 +12,14 @@ public class BossBullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        IDamageable damageable = other.GetComponent<IDamageable>();
+        if (damageable != null && other.CompareTag("Player"))
         {
-            PlayerStats player = other.GetComponent<PlayerStats>();
-            if (player != null)
-            {
-                player.TakeDamage(damage);
-            }
+            damageable.TakeDamage(damage);
             Destroy(gameObject);
         }
 
         if (other.CompareTag("Ground"))
-        {
             Destroy(gameObject);
-        }
     }
 }

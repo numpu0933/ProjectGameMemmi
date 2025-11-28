@@ -12,29 +12,14 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Enemy"))
+        IDamageable damageable = other.GetComponent<IDamageable>();
+        if (damageable != null && (other.CompareTag("Enemy") || other.CompareTag("Boss")))
         {
-            Enemy enemy = other.GetComponent<Enemy>();
-            if (enemy != null)
-            {
-                enemy.TakeDamage(damage);
-            }
-            Destroy(gameObject);
-        }
-
-        if (other.CompareTag("Boss"))
-        {
-            BossController boss = other.GetComponent<BossController>();
-            if (boss != null)
-            {
-                boss.TakeDamage(damage);
-            }
+            damageable.TakeDamage(damage);
             Destroy(gameObject);
         }
 
         if (other.CompareTag("Ground"))
-        {
             Destroy(gameObject);
-        }
     }
 }

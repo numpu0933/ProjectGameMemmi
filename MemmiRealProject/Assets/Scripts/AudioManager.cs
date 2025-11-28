@@ -6,8 +6,8 @@ public class AudioManager : MonoBehaviour
 
     [Header("SFX")]
     public AudioClip enemyHitSound;
-    public AudioClip shootSound;       
-    public AudioClip hitSound;         
+    public AudioClip shootSound;
+    public AudioClip hitSound;
     public AudioClip coinSound;
 
     [Header("Boss SFX")]
@@ -15,7 +15,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip bossDeathSound;
 
     [Header("Music")]
-    public AudioClip winMusic;         
+    public AudioClip winMusic;
 
     private AudioSource audioSource;
 

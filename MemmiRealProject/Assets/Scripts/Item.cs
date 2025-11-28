@@ -11,12 +11,8 @@ public class Item : MonoBehaviour
             PlayerStats player = other.GetComponent<PlayerStats>();
             if (player != null)
             {
-                player.coins += coinValue;
-
-                if (AudioManager.Instance != null && AudioManager.Instance.coinSound != null)
-                {
-                    AudioManager.Instance.PlaySFX(AudioManager.Instance.coinSound);
-                }
+                
+                player.AddCoins(coinValue);
             }
 
             Destroy(gameObject);
