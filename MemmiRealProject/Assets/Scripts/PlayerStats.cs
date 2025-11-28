@@ -4,16 +4,19 @@ using System.Collections;
 
 public class PlayerStats : MonoBehaviour
 {
-    [Header("Player Stats")]
     public int maxHealth = 100;
     public int currentHealth;
     public int coins = 0;
-
-    [Header("Respawn Settings")]
+    public Slider hpSlider;
+    public SpriteRenderer spriteRenderer;
     public Transform respawnPoint;
     public Image blackScreen;
     public float fadeDuration = 1f;
     public float respawnDelay = 1f;
+    public float flashDuration = 0.05f;
+    private Coroutine flashCoroutine;
+    public float regenInterval = 2f;
+    public int regenAmount = 20;
 
     private bool isDead = false;
     private MonoBehaviour playerControl;
@@ -23,8 +26,16 @@ public class PlayerStats : MonoBehaviour
         currentHealth = maxHealth;
         playerControl = GetComponent<MonoBehaviour>();
 
+        if (hpSlider != null)
+        {
+            hpSlider.maxValue = maxHealth;
+            hpSlider.value = currentHealth;
+        }
+
         if (blackScreen != null)
             blackScreen.color = new Color(0, 0, 0, 0);
+
+        StartCoroutine(RegenHealth());
     }
 
     public void TakeDamage(int damage)
@@ -32,6 +43,19 @@ public class PlayerStats : MonoBehaviour
         if (isDead) return;
 
         currentHealth -= damage;
+        if (currentHealth < 0)
+            currentHealth = 0;
+
+        if (hpSlider != null)
+            hpSlider.value = currentHealth;
+
+        if (spriteRenderer != null)
+        {
+            if (flashCoroutine != null)
+                StopCoroutine(flashCoroutine);
+
+            flashCoroutine = StartCoroutine(FlashRed());
+        }
 
         if (currentHealth <= 0)
         {
@@ -44,9 +68,21 @@ public class PlayerStats : MonoBehaviour
         currentHealth += amount;
         if (currentHealth > maxHealth)
             currentHealth = maxHealth;
+
+        if (hpSlider != null)
+            hpSlider.value = currentHealth;
     }
 
-    IEnumerator HandleDeath()
+    private IEnumerator FlashRed()
+    {
+        Color originalColor = spriteRenderer.color;
+        spriteRenderer.color = Color.red;
+        yield return new WaitForSeconds(flashDuration);
+        spriteRenderer.color = originalColor;
+        flashCoroutine = null;
+    }
+
+    private IEnumerator HandleDeath()
     {
         isDead = true;
 
@@ -71,6 +107,8 @@ public class PlayerStats : MonoBehaviour
             transform.position = respawnPoint.position;
 
         currentHealth = maxHealth;
+        if (hpSlider != null)
+            hpSlider.value = currentHealth;
 
         if (playerControl != null)
             playerControl.enabled = true;
@@ -99,8 +137,25 @@ public class PlayerStats : MonoBehaviour
             {
                 TakeDamage(bullet.damage);
             }
-
             Destroy(other.gameObject);
+        }
+    }
+
+    private IEnumerator RegenHealth()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(regenInterval);
+
+            if (!isDead && currentHealth < maxHealth)
+            {
+                currentHealth += regenAmount;
+                if (currentHealth > maxHealth)
+                    currentHealth = maxHealth;
+
+                if (hpSlider != null)
+                    hpSlider.value = currentHealth;
+            }
         }
     }
 }
